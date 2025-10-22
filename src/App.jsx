@@ -1,6 +1,6 @@
 import React from 'react';
 import MemoTable from './components/MemoTable';
-import './styles/memo.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 function App() {
