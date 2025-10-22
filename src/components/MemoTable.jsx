@@ -4,15 +4,18 @@ import api from '../services/api';
 function MemoTable() {
   const [memos, setMemos] = useState([]);
 
-  useEffect(() => {
-    api.get('/api/memos')
-      .then(res => setMemos(res.data))
-      .catch(err => console.error('Error fetching memos:', err));
-  }, []);
+useEffect(() => {
+  api.get('/api/memos')
+    .then(res => {
+      console.log('Fetched memos:', res.data); // debug log
+      setMemos(res.data);
+    })
+    .catch(err => console.error('Error fetching memos:', err));
+}, []);
+
 
   return (
     <div className="container mt-4">
-      <h1 className="mb-4">Movement Register</h1>
       <table className="table table-striped table-bordered">
         <thead className="table-dark">
           <tr>
@@ -48,6 +51,7 @@ function MemoTable() {
           ))}
         </tbody>
       </table>
+      <a href="/api/memos/export" className="btn btn-outline-primary mb-3">Export to Excel</a>
     </div>
   );
 }
