@@ -12,7 +12,6 @@ function App() {
   return (
     <div className="container">
       <h1 className="mb-4">Movement Register</h1>
-      <MemoForm onMemoAdded={handleMemoAdded} />
       <MemoTable key={refreshKey} />
     </div>
   );
