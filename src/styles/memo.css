@@ -1,0 +1,11 @@
+.header1{
+    display: flex;
+    justify-content: space-between;
+}
+.toggleButton{
+    padding: 20px;
+}
+.searchButton{
+    display: flex;
+    justify-content:space-around;
+}

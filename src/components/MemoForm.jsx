@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
-import { TextField, Button, Grid, Typography } from '@mui/material';
+import { TextField, Button, Grid, Typography, Paper, Box } from '@mui/material';
 
 function MemoForm({ onMemoAdded }) {
   const [formData, setFormData] = useState({
@@ -9,9 +9,9 @@ function MemoForm({ onMemoAdded }) {
     subject: '',
     amount: '',
     recipient_office: '',
-    memoImage:''
+    received_by: '',
   });
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]); // multiple files
 
   const formatAmount = (value) => {
     const numeric = value.replace(/[^\d]/g, '');
@@ -23,8 +23,8 @@ function MemoForm({ onMemoAdded }) {
   };
 
   const handleFileChange = e => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files)); // store all selected files
     }
   };
 
@@ -37,29 +37,30 @@ function MemoForm({ onMemoAdded }) {
       data.append('subject', formData.subject);
       data.append('amount', formData.amount);
       data.append('recipient_office', formData.recipient_office);
+      data.append('received_by', formData.received_by);
 
-      if (file) {
-        data.append('memoImage', file); // backend should handle file upload
-      }
-      try {
-       const res = await api.post('http://localhost:5000/api/memos', data, {
+      // append multiple files
+      files.forEach(file => {
+        data.append('memoImages', file); // must match backend field name
+      });
+
+      const res = await api.post('http://localhost:5000/api/memos', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
-         });
+      });
       onMemoAdded(res.data);
-      } catch (error) {
-        console.log("unable bto add:", error )
-      }   
 
-      setFormData({ sender: '', subject: '', amount: '', recipient_office: '', imageUrl: '' });
-      setFile(null);
+      // reset form
+      setFormData({ date_signed: '', sender: '', subject: '', amount: '', recipient_office: '',received_by:'' });
+      setFiles([]);
     } catch (err) {
       console.error('Error saving memo:', err);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <Grid container spacing={2} sx={{ mt: 1 }}>
+    return (
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+      <Grid container spacing={2}>
+        {/* Sender */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="From"
@@ -70,6 +71,8 @@ function MemoForm({ onMemoAdded }) {
             required
           />
         </Grid>
+
+        {/* Recipient Office */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Recipient Office"
@@ -80,6 +83,8 @@ function MemoForm({ onMemoAdded }) {
             required
           />
         </Grid>
+
+        {/* Subject */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Subject"
@@ -90,8 +95,10 @@ function MemoForm({ onMemoAdded }) {
             required
           />
         </Grid>
+
+        {/* Amount */}
         <Grid item xs={12} sm={6}>
-         <TextField
+          <TextField
             label="Amount (₦)"
             name="amount"
             value={formData.amount}
@@ -102,34 +109,64 @@ function MemoForm({ onMemoAdded }) {
             fullWidth
           />
         </Grid>
+
+        {/* Date Signed */}
         <Grid item xs={12} sm={6}>
-         <TextField
-          label="Date Signed"
-          name="date_signed"
-          type="date"
-          value={formData.date_signed}
-          onChange={handleChange}
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          required
-         />
+          <TextField
+            label="Date Signed"
+            name="date_signed"
+            type="date"
+            value={formData.date_signed}
+            onChange={handleChange}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            required
+          />
         </Grid>
 
+        {/* Received By */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Received By"
+            name="received_by"
+            value={formData.received_by}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Grid>
 
         {/* File Upload */}
         <Grid item xs={12}>
-          <Typography variant="subtitle1">Upload Image</Typography>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <Typography variant="subtitle1" gutterBottom>
+            Upload Images
+          </Typography>
+          <Button variant="outlined" component="label">
+            Choose Files
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+          {files.length > 0 && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              {files.length} file(s) selected
+            </Typography>
+          )}
         </Grid>
 
+        {/* Submit */}
         <Grid item xs={12} textAlign="right">
           <Button type="submit" variant="contained" color="success">
             Save Memo
           </Button>
         </Grid>
       </Grid>
-    </form>
+    </Box>
   );
-}
+};
 
 export default MemoForm;

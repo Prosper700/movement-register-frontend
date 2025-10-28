@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import MemoForm from './MemoForm';
+import MemoImagesCell from "./MemoImagesCell"
+import FilteredResultsDialog from './FilteredResultsDialog';
+import Carousel from "react-material-ui-carousel";
 
 import {
   Fab,
   Dialog,
   DialogTitle,
   DialogContent,
-  Grid,
+  IconButton, 
+  InputAdornment,
   Table,
   TableHead,
   TableRow,
@@ -20,20 +24,15 @@ import {
   Pagination
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ClearIcon from '@mui/icons-material/Clear';
 
 function MemoTable() {
   const [memos, setMemos] = useState([]);
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredMemos, setFilteredMemos] = useState([]);
+  const [openPopup, setOpenPopup] = useState(false); 
   const [page, setPage] = useState(1);
-  const [filtersVisible, setFiltersVisible] = useState(true);
-  const [filters, setFilters] = useState({
-  sender: '',
-  recipient_office: '',
-  subject: '',
-  startDate: '',
-  endDate: ''
-});
-
 
 
   const fetchMemos = () => {
@@ -63,11 +62,18 @@ function MemoTable() {
   const startIndex = (page - 1) * memosPerPage;
   const currentMemos = memos.slice(startIndex, startIndex + memosPerPage);
 
-  const formatCurrency = (value) => {
-    const number = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
-    if (isNaN(number)) return '';
-    return `₦${number.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-  };
+  function formatCurrency(value) {
+  if (value === null || value === undefined || isNaN(Number(value))) {
+    return ''; // fallback: show nothing if invalid
+  }
+
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 2
+  }).format(value);
+}
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -76,113 +82,80 @@ function MemoTable() {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
-  
-  const filteredMemos = memos.filter((memo) => {
-    const query = {
-      sender: filters.sender.toLowerCase(),
-      office: filters.recipient_office.toLowerCase(),
-      subject: filters.subject.toLowerCase()
-    };
 
-    const date = new Date(memo.date_signed);
-    const start = filters.startDate ? new Date(filters.startDate) : null;
-    const end = filters.endDate ? new Date(filters.endDate) : null;
 
+ 
+  const handleSearch = () => {
+   if (!searchQuery.trim()) {
+    // prevent search if input is empty
+    alert("Please enter a search term before searching.");
+    return;
+  }
+  const results = memos.filter((memo) => {
+  const query = searchQuery.toLowerCase();
     return (
-      memo.sender.toLowerCase().includes(query.sender) &&
-      memo.recipient_office.toLowerCase().includes(query.office) &&
-      memo.subject.toLowerCase().includes(query.subject) &&
-      (!start || date >= start) &&
-      (!end || date <= end)
+      memo.sender.toLowerCase().includes(query) ||
+      memo.subject.toLowerCase().includes(query) ||
+      memo.recipient_office.toLowerCase().includes(query) ||
+      formatDate(memo.date_signed).includes(query)
     );
   });
 
+  setFilteredMemos(results);
+  setOpenPopup(true);  // open popup only after button click
+  console.log(setFilteredMemos);
+};
 
-  
+
 
   return (
     <div>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Button variant="outlined" onClick={() => setFiltersVisible(!filtersVisible)}>
-          {filtersVisible ? 'Hide Filters' : 'Show Filters'}
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() =>
-            setFilters({
-            sender: '',
-            recipient_office: '',
-            subject: '',
-            startDate: '',
-            endDate: ''
-          })
-          }
-        >
-          Reset Filters
-        </Button>
-      </Box>
-
-      {filtersVisible && (
-        <Grid container spacing={2} style={{ marginBottom: 16 }}>
-          <Grid item xs={12} sm={3}>
-            <TextField
-              label="Sender"
-              value={filters.sender}
-              onChange={(e) => setFilters({ ...filters, sender: e.target.value })}
-              fullWidth
-              />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-            label="Recipient Office"
-            value={filters.recipient_office}
-            onChange={(e) => setFilters({ ...filters, recipient_office: e.target.value })}
-            fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-            label="Subject"
-            value={filters.subject}
-            onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-            fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField
-            label="Start Date"
-            type="date"
-            value={filters.startDate}
-            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-            <Grid item xs={12} sm={3}>
-            <TextField
-              label="End Date"
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-        </Grid>
-      )}
-
-
+        <div className='searchButton'>
+          <TextField
+          label="Search Memos"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ marginBottom: 16, width:"950px"}}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                {searchQuery && (
+                <IconButton onClick={() => setSearchQuery('')}>
+                  <ClearIcon />
+                </IconButton>
+                )}
+              </InputAdornment>
+            )
+          }}
+          />
+          <Button
+            variant="contained" 
+            color="primary" 
+            onClick={handleSearch}   // <-- only runs when clicked
+            style={{ marginBottom: 16, width:"20"}}
+          >
+            Search
+          </Button>
+        </div>
+        <FilteredResultsDialog
+          open={openPopup}
+          onClose={() => setOpenPopup(false)}
+          filteredMemos={filteredMemos}
+          formatDate={formatDate}
+          formatCurrency={formatCurrency}
+        />
       <Paper elevation={3}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Date Sent</TableCell>
+              {/* <TableCell>Date Sent</TableCell> */}
               <TableCell>Date Signed</TableCell>
               <TableCell>From</TableCell>
               <TableCell>Subject</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Sent</TableCell>
+              <TableCell>Received By</TableCell>
               <TableCell>Image</TableCell>
             </TableRow>
           </TableHead>
@@ -190,29 +163,19 @@ function MemoTable() {
             {currentMemos.length > 0 ? (
               currentMemos.map(memo => (
                 <TableRow key={memo.id}>
-                  <TableCell>{new Date(memo.date_sent).toLocaleString()}</TableCell>
+                  {/* <TableCell>{new Date(memo.date_sent).toLocaleString()}</TableCell> */}
                   <TableCell>{formatDate(memo.date_signed)}</TableCell>
                   <TableCell>{memo.sender}</TableCell>
                   <TableCell>{memo.subject}</TableCell>
                   <TableCell>{memo.amount && formatCurrency(memo.amount)}</TableCell>
                   <TableCell>{memo.recipient_office}</TableCell>
-                  <TableCell>
-                    {memo.image_url ? (
-                      <a
-                      href={`http://localhost:5000${memo.image_url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-sm btn-primary"
-                      >
-                        View
-                      </a>
-                    ) : '—'}
-                  </TableCell>
+                  <TableCell>{memo.received_by}</TableCell>
+                  <MemoImagesCell memo={memo} />
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   No memos found
                 </TableCell>
               </TableRow>
