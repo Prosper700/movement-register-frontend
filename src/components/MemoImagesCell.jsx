@@ -19,6 +19,7 @@ function MemoImagesCell({ memo }) {
     setOpen(true);
   };
   const handleClose = () => setOpen(false);
+  console.log("Memo images:", memo.images);
 
   return (
     <>
@@ -53,11 +54,11 @@ function MemoImagesCell({ memo }) {
             onChangeIndex={(i) => setIndex(i)}
             enableMouseEvents
           >
-            {memo.images.map((img) => (
-              <div key={img.id} style={{ textAlign: "center" }}>
+            {memo.images.map((img, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
                 <img
-                  src={`http://localhost:5000${img.image_url}`}
-                  alt="memo"
+                  src={img.image_url}   // 👈 use the property
+                  alt={`Memo Image ${i + 1}`}
                   style={{
                     width: "100%",
                     maxHeight: 500,
@@ -67,6 +68,7 @@ function MemoImagesCell({ memo }) {
                 />
               </div>
             ))}
+
           </SwipeableViews>
         </DialogContent>
       </Dialog>

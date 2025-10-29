@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
-import { TextField, Button, Grid, Typography, Paper, Box } from '@mui/material';
+import { TextField, Button, Grid, Typography, Box } from '@mui/material';
 
 function MemoForm({ onMemoAdded }) {
   const [formData, setFormData] = useState({
@@ -11,11 +11,12 @@ function MemoForm({ onMemoAdded }) {
     recipient_office: '',
     received_by: '',
   });
-  const [files, setFiles] = useState([]); // multiple files
+  const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const formatAmount = (value) => {
     const numeric = value.replace(/[^\d]/g, '');
-    return numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ','); 
+    return numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
   const handleChange = e => {
@@ -24,13 +25,15 @@ function MemoForm({ onMemoAdded }) {
 
   const handleFileChange = e => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files)); // store all selected files
+      setFiles(Array.from(e.target.files));
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setUploading(true);
     try {
+      // Build FormData to send files + fields together
       const data = new FormData();
       data.append('date_signed', formData.date_signed);
       data.append('sender', formData.sender);
@@ -39,26 +42,35 @@ function MemoForm({ onMemoAdded }) {
       data.append('recipient_office', formData.recipient_office);
       data.append('received_by', formData.received_by);
 
-      // append multiple files
       files.forEach(file => {
-        data.append('memoImages', file); // must match backend field name
+        data.append('memoImages', file); // 👈 matches multer field name
       });
 
-      const res = await api.post("http://localhost:5000/api/memos", data, {
-        withCredentials: true, // 👈 send session cookie
+      const res = await api.post('/memos', data, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (onMemoAdded) onMemoAdded(res.data)
+      if (onMemoAdded) onMemoAdded(res.data);
 
-      // reset form
-      setFormData({ date_signed: '', sender: '', subject: '', amount: '', recipient_office: '',received_by:'' });
+      // Reset form
+      setFormData({
+        date_signed: '',
+        sender: '',
+        subject: '',
+        amount: '',
+        recipient_office: '',
+        received_by: '',
+      });
       setFiles([]);
     } catch (err) {
       console.error('Error saving memo:', err);
+    } finally {
+      setUploading(false);
     }
   };
 
-    return (
+  return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
       <Grid container spacing={2}>
         {/* Sender */}
@@ -161,13 +173,13 @@ function MemoForm({ onMemoAdded }) {
 
         {/* Submit */}
         <Grid item xs={12} textAlign="right">
-          <Button type="submit" variant="contained" color="success">
-            Save Memo
+          <Button type="submit" variant="contained" color="success" disabled={uploading}>
+            {uploading ? 'Uploading...' : 'Save Memo'}
           </Button>
         </Grid>
       </Grid>
     </Box>
   );
-};
+}
 
 export default MemoForm;
