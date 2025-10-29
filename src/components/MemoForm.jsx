@@ -44,10 +44,11 @@ function MemoForm({ onMemoAdded }) {
         data.append('memoImages', file); // must match backend field name
       });
 
-      const res = await api.post('http://localhost:5000/api/memos', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await api.post("http://localhost:5000/api/memos", data, {
+        withCredentials: true, // 👈 send session cookie
       });
-      onMemoAdded(res.data);
+
+      if (onMemoAdded) onMemoAdded(res.data)
 
       // reset form
       setFormData({ date_signed: '', sender: '', subject: '', amount: '', recipient_office: '',received_by:'' });

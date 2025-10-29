@@ -1,26 +1,54 @@
-import React, { useState } from 'react';
-import MemoForm from './components/MemoForm';
-import MemoTable from './components/MemoTable';
-import Toggle from "./components/Header"
+import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Box } from '@mui/material';
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import Toggle from "./components/Header";
 
 function App() {
-  const [refreshKey, setRefreshKey] = useState(0);
-    const handleMemoAdded = () => {
-    setRefreshKey(old => old + 1);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Check cookie/session on first load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/auth/check", {
+          credentials: "include", // 👈 send cookie
+        });
+        const data = await res.json();
+        if (data.loggedIn) {
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.error("Auth check failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
-      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', p: 2 }}>
-        <header className="header1">
+    <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', p: 2 }}>
+      <header className="header1">
         <h1 className="mb-4">Movement Register</h1>
-        <div className='toggleButton'>
-          < Toggle />
+        <div className="toggleButton">
+          <Toggle />
         </div>
-        </header>
-        <MemoTable key={refreshKey} />
-      </Box>
+      </header>
+
+      {/* ✅ Show login or dashboard depending on auth */}
+      {isAuthenticated ? (
+        <Dashboard onLogout={() => setIsAuthenticated(false)} />
+      ) : (
+        <Login onLogin={() => setIsAuthenticated(true)} />
+      )}
+    </Box>
   );
 }
 

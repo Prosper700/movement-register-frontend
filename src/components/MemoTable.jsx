@@ -3,7 +3,7 @@ import api from '../services/api';
 import MemoForm from './MemoForm';
 import MemoImagesCell from "./MemoImagesCell"
 import FilteredResultsDialog from './FilteredResultsDialog';
-import Carousel from "react-material-ui-carousel";
+
 
 import {
   Fab,
@@ -33,6 +33,7 @@ function MemoTable() {
   const [filteredMemos, setFilteredMemos] = useState([]);
   const [openPopup, setOpenPopup] = useState(false); 
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0); // 👈 added
 
 
   const fetchMemos = () => {
@@ -48,12 +49,35 @@ function MemoTable() {
   };
 
   useEffect(() => {
+    const fetchMemos = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/memos", {
+          method: "GET",
+          credentials: "include", // 👈 ensures session cookie is sent
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch memos");
+        }
+
+        const data = await res.json();
+        setMemos(data);
+      } catch (err) {
+        console.error("Error fetching memos:", err);
+      }
+    };
+
     fetchMemos();
-  }, []);
+  }, []); // runs once when component mounts
+
+    // ✅ Re-fetch whenever refreshKey changes
+  useEffect(() => {
+    fetchMemos();
+  }, [refreshKey]);
 
   const handleMemoAdded = () => {
     setOpen(false);
-    fetchMemos();
+    setRefreshKey((prev) => prev + 1); // 👈 trigger refresh
   };
 
   // ✅ Pagination logic
@@ -196,6 +220,20 @@ function MemoTable() {
         )}
       </Paper><br />
       <a href="/api/memos/export" className="btn btn-outline-primary mb-3">Export to Excel</a>
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={async () => {
+          await fetch("http://localhost:5000/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+          window.location.reload(); // or call a prop like onLogout()
+        }}
+        sx={{ display: "block", mt: 2 }}
+      >
+        Logout
+      </Button>
 
       {/* Floating Add Button */}
       <Fab
