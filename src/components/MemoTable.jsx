@@ -149,7 +149,6 @@ function MemoTable() {
         <Table>
           <TableHead>
             <TableRow>
-              {/* <TableCell>Date Sent</TableCell> */}
               <TableCell>Date Signed</TableCell>
               <TableCell>From</TableCell>
               <TableCell>Subject</TableCell>
