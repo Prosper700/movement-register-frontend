@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/auth/check", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/check`, {
           credentials: "include", // 👈 send cookie
         });
         const data = await res.json();

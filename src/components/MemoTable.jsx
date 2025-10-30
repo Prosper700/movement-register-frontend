@@ -37,7 +37,7 @@ function MemoTable() {
 
 
   const fetchMemos = () => {
-    api.get('http://localhost:5000/api/memos')
+    api.get("/memos")
       .then(res => {
         // ✅ Take only the latest 100 memos
         const latest = res.data
@@ -51,7 +51,7 @@ function MemoTable() {
   useEffect(() => {
     const fetchMemos = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/memos", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/memos`, {
           method: "GET",
           credentials: "include", // 👈 ensures session cookie is sent
         });
@@ -219,12 +219,12 @@ function MemoTable() {
           </Box>
         )}
       </Paper><br />
-      <a href="/api/memos/export" className="btn btn-outline-primary mb-3">Export to Excel</a>
+      <a href={`${import.meta.env.VITE_API_URL}/memos/export`} className="btn btn-outline-primary mb-3">Export to Excel</a>
       <Button
         variant="outlined"
         color="error"
         onClick={async () => {
-          await fetch("http://localhost:5000/logout", {
+          await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
             method: "POST",
             credentials: "include",
           });
