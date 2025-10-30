@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import api from "../services/api"; // 👈 use your axios instance
 
 function Login({ onLogin }) {
   const [password, setPassword] = useState("");
@@ -17,27 +18,21 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ password }), // 👈 only password
-    });
-    if (res.ok) {
-      onLogin();
-    } else {
-      alert("Login failed");
+    try {
+      const res = await api.post("/login", { password });
+      if (res.data.success) {
+        onLogin();
+      } else {
+        alert(res.data.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Server unreachable");
     }
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="50vh"
-      bgcolor="inherit"
-    >
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh" bgcolor="inherit">
       <Paper elevation={3} sx={{ p: 4, width: 350 }}>
         <Typography variant="h5" align="center" gutterBottom>
           Login
@@ -55,23 +50,14 @@ function Login({ onLogin }) {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                  >
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-          >
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
             Login
           </Button>
         </form>
