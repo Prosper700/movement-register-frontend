@@ -51,7 +51,7 @@ function MemoTable() {
   useEffect(() => {
     const fetchMemos = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/memos`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/memos`, {
           method: "GET",
           credentials: "include", // 👈 ensures session cookie is sent
         });
@@ -219,12 +219,12 @@ function MemoTable() {
           </Box>
         )}
       </Paper><br />
-      <a href={`${import.meta.env.VITE_API_URL}/memos/export`} className="btn btn-outline-primary mb-3">Export to Excel</a>
+      <a href={`${import.meta.env.VITE_API_URL}/api/memos/export`} className="btn btn-outline-primary mb-3">Export to Excel</a>
       <Button
         variant="outlined"
         color="error"
         onClick={async () => {
-          await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+          await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
             method: "POST",
             credentials: "include",
           });
