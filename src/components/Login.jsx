@@ -15,11 +15,15 @@ import api from "../services/api"; // 👈 use your axios instance
 function Login({ onLogin }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/login", { password });
+      const res = await api.post(
+        "/login",
+        { password },
+        { withCredentials: true }   // 👈 this is critical
+      );
+
       if (res.data.success) {
         onLogin();
       } else {
@@ -30,6 +34,7 @@ function Login({ onLogin }) {
       alert("Server unreachable");
     }
   };
+
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh" bgcolor="inherit">
