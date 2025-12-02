@@ -26,10 +26,7 @@ To deploy this project run
 
 ## Tech Stack
 
-**Frontend** React + Vite
-
-**Backend** Express.JS, Node JS.
-
+React + Vite
 
 ## Feedback
 
