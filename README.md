@@ -1,16 +1,36 @@
-# React + Vite
+# Hi, I'm John! 👋
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 About Me
+I'm an aspiring full stack developer...
 
-Currently, two official plugins are available:
+## What I built
+Movement Register
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A movement register that tracks the movemnet of ingoing and outgoing memos within the department in an organisation.
 
-## React Compiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Authors
 
-## Expanding the ESLint configuration
+- [@Prosper700](https://www.github.com/Prosper700)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Deployment
+
+To deploy this project run
+
+```bash
+  npm run dev
+```
+
+
+
+## Tech Stack
+
+**Frontend** React + Vite
+
+**Backend** Express.JS, Node JS.
+
+
+## Feedback
+
+If you have any feedback, please reach out to us at ezekielprosper777@gmail.com
