@@ -6,7 +6,7 @@ I'm an aspiring full stack developer...
 ## What I built
 Movement Register
 
-A movement register that tracks the movemnet of ingoing and outgoing memos within the department in an organisation.
+A movement register that tracks the movement of ingoing and outgoing memos within the department in an organisation.
 
 
 ## Authors
